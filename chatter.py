@@ -30,6 +30,8 @@ Answer generic user travel related queries from your knowledgebase and context b
 For package and deal queries , answer from travelbestbets source with pricing and date information. Also provide a link from travelbestbets site.
 For realtime information and latest deals , answer from travelbestbets source with pricing and date information. Also provide a link from travelbestbets site.
 Do not provide link from any other website apart from travelbestbets
+Change new line character in response to <br>
+Enclose url in the url inside href tag
 
 {summaries}
 
@@ -62,7 +64,7 @@ def get_response(query):
     try:
         docs_tbb = docsearch_BestBet.similarity_search(query, k=2)
         docs.extend(docs_tbb)
-        docs_travel = docsearch_Travel.similarity_search(query, k=1)
+        docs_travel = docsearch_Travel.similarity_search(query, k=2)
         docs.extend(docs_travel)
 
         response = chain({"input_documents": docs, "question": query}, return_only_outputs=True)
@@ -71,7 +73,7 @@ def get_response(query):
         return "Unable to complete request. Please try after sometime."
 
     print(response)
-    return response['output_text'].replace("\n", "<br><br>")
+    return response['output_text']
 
 
 def reset():
