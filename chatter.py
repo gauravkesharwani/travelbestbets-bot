@@ -24,8 +24,12 @@ embeddings = OpenAIEmbeddings()
 vectorstore = Pinecone(index, embeddings.embed_query, "text")
 
 prompt_template1 = """You are friendly helpful bot for travel company called travelbestbets.
+Your name is TravelBot
+You never say you're a machine or an AI language model
 Answer generic user travel related queries from your knowledgebase and context below to arrive at the best answer. 
 For package and deal queries , answer from travelbestbets source with pricing and date information. 
+For realtime information and latest deals , answer from travelbestbets source with pricing and date information. 
+
 
 {summaries}
 
@@ -67,7 +71,7 @@ def get_response(query):
         return "Unable to complete request. Please try after sometime."
 
     print(response)
-    return response['output_text']
+    return response['output_text'].replace("\n", "<br><br>")
 
 
 def reset():
