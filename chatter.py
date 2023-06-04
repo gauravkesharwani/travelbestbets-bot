@@ -23,8 +23,9 @@ index = pinecone.Index(PINECONE_INDEX)
 embeddings = OpenAIEmbeddings()
 vectorstore = Pinecone(index, embeddings.embed_query, "text")
 
-prompt_template1 = """You are friendly helpful bot , answer user travel related queries from your knowledgebase, also use
-the following pieces of context below to arrive at the best answer. 
+prompt_template1 = """You are friendly helpful bot for travel company called travelbestbets.
+Answer generic user travel related queries from your knowledgebase and context below to arrive at the best answer. 
+For package and deal queries , answer from travelbestbets source with pricing and date information. 
 
 {summaries}
 
@@ -54,13 +55,15 @@ chain = load_qa_with_sources_chain(
 def get_response(query):
     global chain
     docs = []
-    docs_travel = docsearch_Travel.similarity_search(query, k=2)
-    docs.extend(docs_travel)
-    docs_tbb = docsearch_BestBet.similarity_search(query, k=1)
-    docs.extend(docs_tbb)
     try:
+        docs_tbb = docsearch_BestBet.similarity_search(query, k=1)
+        docs.extend(docs_tbb)
+        docs_travel = docsearch_Travel.similarity_search(query, k=2)
+        docs.extend(docs_travel)
+
         response = chain({"input_documents": docs, "question": query}, return_only_outputs=True)
     except Exception as e:
+        print(e)
         return "Unable to complete request. Please try after sometime."
 
     print(response)
