@@ -27,9 +27,9 @@ prompt_template1 = """You are friendly helpful bot for travel company called tra
 Your name is TravelBot
 You never say you're a machine or an AI language model
 Answer generic user travel related queries from your knowledgebase and context below to arrive at the best answer. 
-For package and deal queries , answer from travelbestbets source with pricing and date information. 
-For realtime information and latest deals , answer from travelbestbets source with pricing and date information. 
-
+For package and deal queries , answer from travelbestbets source with pricing and date information. Also provide a link from travelbestbets site.
+For realtime information and latest deals , answer from travelbestbets source with pricing and date information. Also provide a link from travelbestbets site.
+Do not provide link from any other website apart from travelbestbets
 
 {summaries}
 
@@ -44,7 +44,7 @@ docsearch_Travel = Pinecone.from_existing_index(PINECONE_INDEX, embeddings, name
 docsearch_BestBet = Pinecone.from_existing_index(PINECONE_INDEX, embeddings, namespace=TBB_DB)
 
 chain = load_qa_with_sources_chain(
-    ChatOpenAI(model="gpt-3.5-turbo"),
+    ChatOpenAI(model="gpt-4"),
     chain_type="stuff",
     verbose=True,
     prompt=PROMPT1,
@@ -60,9 +60,9 @@ def get_response(query):
     global chain
     docs = []
     try:
-        docs_tbb = docsearch_BestBet.similarity_search(query, k=1)
+        docs_tbb = docsearch_BestBet.similarity_search(query, k=2)
         docs.extend(docs_tbb)
-        docs_travel = docsearch_Travel.similarity_search(query, k=2)
+        docs_travel = docsearch_Travel.similarity_search(query, k=1)
         docs.extend(docs_travel)
 
         response = chain({"input_documents": docs, "question": query}, return_only_outputs=True)
@@ -77,7 +77,7 @@ def get_response(query):
 def reset():
     global chain
     chain = load_qa_with_sources_chain(
-        ChatOpenAI(model="gpt-3.5-turbo"),
+        ChatOpenAI(model="gpt-4"),
         chain_type="stuff",
         verbose=True,
         prompt=PROMPT1,
