@@ -8,8 +8,15 @@ from langchain.memory import ConversationBufferWindowMemory
 from langchain.prompts import PromptTemplate
 from langchain.vectorstores import Pinecone
 from langchain.chains.qa_with_sources import load_qa_with_sources_chain
+from langchain.tools import Tool
+from langchain.utilities import OpenWeatherMapAPIWrapper
+from langchain.agents import initialize_agent, AgentType
 
 load_dotenv()
+
+os.environ["OPENWEATHERMAP_API_KEY"] = os.getenv('OPENWEATHERMAP_API_KEY')
+
+weather = OpenWeatherMapAPIWrapper()
 
 PINECONE_API_KEY = os.getenv('PINECONE_API_KEY')
 PINECONE_ENV = os.getenv('PINECONE_ENV')
@@ -30,6 +37,7 @@ Answer generic user travel related queries from your knowledgebase and context b
 For package and deal queries , answer from travelbestbets source with pricing and date information. Also provide a link from travelbestbets site.
 For realtime information and latest deals , answer from travelbestbets source with pricing and date information. Also provide a link from travelbestbets site.
 Do not provide link from any other website apart from travelbestbets
+For any weather related queries , just say 'Providing dummy weather info'
 Change new line character in response to <br>
 Enclose url in the url inside href tag
 
@@ -57,6 +65,28 @@ chain = load_qa_with_sources_chain(
     )
 )
 
+tools = [
+    Tool.from_function(
+        func=weather.run,
+        name="weather",
+        description="useful for when you need to answer questions about weather"
+        # coroutine= ... <- you can specify an async method if desired as well
+    ),
+]
+
+agent_chain = initialize_agent(
+    tools=tools,
+    llm=ChatOpenAI(model="gpt-3.5-turbo"),
+    agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+    verbose=True
+)
+
+
+def process_response(response, query):
+    if "dummy" in response:
+        return agent_chain.run(query)
+    return response
+
 
 def get_response(query):
     global chain
@@ -73,7 +103,8 @@ def get_response(query):
         return "Unable to complete request. Please try after sometime."
 
     print(response)
-    return response['output_text']
+
+    return process_response(response['output_text'],query)
 
 
 def reset():

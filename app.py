@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 @app.route("/")
 def home():
+    chatter.reset()
     return render_template("index.html")
 
 

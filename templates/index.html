@@ -132,6 +132,11 @@
         textRemove.remove();
         appendMessage(BOT_NAME, BOT_IMG, "left", msgText);
 
+      }).fail(function() {
+
+        var textRemove = document.getElementById("thinking");
+        textRemove.remove();
+        appendMessage(BOT_NAME, BOT_IMG, "left", "Unable to get the information. Please retry.");
       });
 
     }
