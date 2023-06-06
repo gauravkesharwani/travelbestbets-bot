@@ -122,7 +122,7 @@ tools = [
 
 tools.extend(load_tools(["openweathermap-api"]))
 
-agent = initialize_agent(tools, llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True)
+agent = initialize_agent(tools, llm, agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION, verbose=True)
 
 
 def process_response(response):
