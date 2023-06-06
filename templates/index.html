@@ -134,21 +134,9 @@
 
       }).fail(function() {
 
-        fail_msg =`
-        I can't find a deal but one of our travel consultants would be happy to help you.  To get a quote click <a href="https://travelbestbets.com/request-a-quote/">here</a>
-        <br>
-Or feel free to contact our office:<br>
-☎️ 1-877-523-7823 <br>
-
-📧 info@travelbestbets.com<br>
-
-And get our amazing deals sent right to your inbox. Sign up for our weekly Travel Best Bets Newsletter click <a href="https://travelbestbets.com/request-a-quote/">here</a>
-
-        `;
-
         var textRemove = document.getElementById("thinking");
         textRemove.remove();
-        appendMessage(BOT_NAME, BOT_IMG, "left", fail_msg);
+        appendMessage(BOT_NAME, BOT_IMG, "left", 'Unable to complete request. Please retry.');
       });
 
     }

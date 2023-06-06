@@ -1,122 +1,170 @@
 import os
 import pinecone
 from dotenv import load_dotenv
-from langchain.chains import RetrievalQA
+from langchain.agents import AgentType
+from langchain.agents import initialize_agent, Tool, load_tools
+from langchain.chains import RetrievalQA, RetrievalQAWithSourcesChain
 from langchain.chat_models import ChatOpenAI
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.memory import ConversationBufferWindowMemory
 from langchain.prompts import PromptTemplate
-from langchain.vectorstores import Pinecone
-from langchain.chains.qa_with_sources import load_qa_with_sources_chain
-from langchain.tools import Tool
 from langchain.utilities import OpenWeatherMapAPIWrapper
-from langchain.agents import initialize_agent, AgentType
+from langchain.vectorstores import Pinecone
 
 load_dotenv()
 
-os.environ["OPENWEATHERMAP_API_KEY"] = os.getenv('OPENWEATHERMAP_API_KEY')
+PINECONE_API_KEY = os.environ.get("PINECONE_API_KEY")
+PINECONE_ENV = os.environ.get("PINECONE_ENV")
+PINECONE_INDEX = os.environ.get("PINECONE_INDEX")
+NAMESPACE_TBB = os.environ.get("NAMESPACE_TBB")
+NAMESPACE_CORE = os.environ.get("NAMESPACE_CORE")
+RETURN_DOCS_COUNT = int(os.environ.get("RETURN_DOCS_COUNT"))
+CHAT_HISTORY_COUNT = int(os.environ.get("CHAT_HISTORY_COUNT"))
+CHATGPT_MODEL = os.environ.get("CHATGPT_MODEL")
+
 
 weather = OpenWeatherMapAPIWrapper()
-
-PINECONE_API_KEY = os.getenv('PINECONE_API_KEY')
-PINECONE_ENV = os.getenv('PINECONE_ENV')
-PINECONE_INDEX = os.getenv('PINECONE_INDEX')
-CORE_DB = os.getenv('CORE_DB')
-TBB_DB = os.getenv('TBB_DB')
-
-os.environ["OPENAI_API_KEY"] = os.getenv('OPENAI_API_KEY')
 pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENV)
 index = pinecone.Index(PINECONE_INDEX)
 embeddings = OpenAIEmbeddings()
 vectorstore = Pinecone(index, embeddings.embed_query, "text")
 
-prompt_template1 = """You are friendly helpful bot for travel company called travelbestbets.
+prompt_template_tbb = """You are friendly helpful bot for travel company called travelbestbets.
 Your name is TravelBot
 You never say you're a machine or an AI language model
-Answer generic user travel related queries from your knowledgebase and context below to arrive at the best answer. 
-For package and deal queries , answer from travelbestbets source with pricing and date information. Also provide a link from travelbestbets site.
-For realtime information and latest deals , answer from travelbestbets source with pricing and date information. Also provide a link from travelbestbets site.
-Do not provide link from any other website apart from travelbestbets
-For any weather related queries , just say 'Providing dummy weather info'
+You provide package, deals and pricing information for any destination from context below only. Provide link to the source of the answer.
+If you dont have an answer from below context, Provide this response ['output':'I dont know']
 Change new line character in response to <br>
-Enclose url in the url inside href tag
+Enclose url in the url inside 'a' tag
 
 {summaries}
 
 {chat_history}
 Question: {question}
 Answer:"""
-PROMPT1 = PromptTemplate(
-    template=prompt_template1, input_variables=["summaries", "chat_history", "question"]
+PROMPT_tbb = PromptTemplate(
+    template=prompt_template_tbb, input_variables=["summaries", "chat_history", "question"]
 )
 
-docsearch_Travel = Pinecone.from_existing_index(PINECONE_INDEX, embeddings, namespace=CORE_DB)
-docsearch_BestBet = Pinecone.from_existing_index(PINECONE_INDEX, embeddings, namespace=TBB_DB)
+prompt_template_core = """You are friendly helpful bot for travel company called travelbestbets.
+Your name is TravelBot
+You never say you're a machine or an AI language model
+Answer generic user travel related queries from your knowledgebase and context below to arrive at the best answer. 
+Do not provide any source link.
+Change new line character in response to <br>
 
-chain = load_qa_with_sources_chain(
-    ChatOpenAI(model="gpt-4"),
+{context}
+
+{chat_history}
+Question: {question}
+Answer:"""
+PROMPT_core = PromptTemplate(
+    template=prompt_template_core, input_variables=["context", "chat_history", "question"]
+)
+
+docsearch_Travel = Pinecone.from_existing_index(PINECONE_INDEX, embeddings, namespace=NAMESPACE_CORE)
+docsearch_BestBets = Pinecone.from_existing_index(PINECONE_INDEX, embeddings, namespace=NAMESPACE_TBB)
+
+llm = ChatOpenAI(model=CHATGPT_MODEL)
+memory = ConversationBufferWindowMemory(
+    k=CHAT_HISTORY_COUNT,
+    memory_key="chat_history",
+    input_key="question")
+
+qa_travel = RetrievalQA.from_chain_type(
+    llm=llm,
     chain_type="stuff",
-    verbose=True,
-    prompt=PROMPT1,
-    memory=ConversationBufferWindowMemory(
-        k=3,
-        memory_key="chat_history",
-        input_key="question"
-    )
+    retriever=docsearch_Travel.as_retriever(search_kwargs={"k": RETURN_DOCS_COUNT}),
+
+    chain_type_kwargs={
+        "verbose": True,
+        "prompt": PROMPT_core,
+        "memory": memory
+    }
 )
+
+qa_BestBets = RetrievalQAWithSourcesChain.from_chain_type(
+    llm=llm,
+    chain_type="stuff",
+    retriever=docsearch_BestBets.as_retriever(search_kwargs={"k": RETURN_DOCS_COUNT}),
+    chain_type_kwargs={
+        "verbose": True,
+        "prompt": PROMPT_tbb,
+        "memory": memory
+    }
+
+)
+
+
+def get_tbb(query):
+    answer = qa_BestBets({"question": query}, return_only_outputs=True)['answer']
+    return answer
+
 
 tools = [
-    Tool.from_function(
-        func=weather.run,
-        name="weather",
-        description="useful for when you need to answer questions about weather"
-        # coroutine= ... <- you can specify an async method if desired as well
+    Tool(
+        name="Generic Core",
+        func=qa_travel.run,
+        description="useful for when you need to answer generic travel related questions or about company yello jello "
+                    "or any weather related query.",
+        return_direct=True
     ),
+    Tool(
+        name="Travel Best Bets",
+        func=get_tbb,
+        description="useful for when you need to answer questions about travel deals ,travel packages and pricing "
+                    "about any location. Pass the whole question as input. Say I dont know if you dont know the "
+                    "answer",
+        return_direct=True
+    )
 ]
 
-agent_chain = initialize_agent(
-    tools=tools,
-    llm=ChatOpenAI(model="gpt-3.5-turbo"),
-    agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-    verbose=True
-)
+tools.extend(load_tools(["openweathermap-api"]))
+
+agent = initialize_agent(tools, llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True)
 
 
-def process_response(response, query):
-    if "dummy" in response:
-        return agent_chain.run(query)
-    return response
+def process_response(response):
+    if 'output' in response:
+
+        answer = response['output']
+
+        if 'I dont know' in answer:
+            return '''I can't find a deal but one of our travel consultants would be happy to help you.<br> To get a 
+               quote click here: <a href="https://travelbestbets.com/request-a-quote/">Request a quote</a> <br> Or feel free to contact our office: <br> ☎ 
+               1-877-523-7823 <br> 📧 info@travelbestbets.com <br> And get our amazing deals sent right to your inbox. Sign 
+               up for our weekly Travel Best Bets Newsletter here: <a href="https://travelbestbets.com/services/best-bets-newsletter/">Newsletter</a> 
+               '''
+
+        return answer
+    if 'I dont know' in response:
+        return '''I can't find a deal but one of our travel consultants would be happy to help you.<br> To get a 
+        quote click here: https://travelbestbets.com/request-a-quote/ <br> Or feel free to contact our office: <br> ☎ 
+        1-877-523-7823 <br> 📧 info@travelbestbets.com <br> And get our amazing deals sent right to your inbox. Sign 
+        up for our weekly Travel Best Bets Newsletter here: https://travelbestbets.com/services/best-bets-newsletter/ 
+        '''
+    else:
+        return response
 
 
 def get_response(query):
-    global chain
-    docs = []
-    try:
-        docs_tbb = docsearch_BestBet.similarity_search(query, k=2)
-        docs.extend(docs_tbb)
-        docs_travel = docsearch_Travel.similarity_search(query, k=2)
-        docs.extend(docs_travel)
+    global agent
 
-        response = chain({"input_documents": docs, "question": query}, return_only_outputs=True)
+    try:
+        response = agent(query)
+
     except Exception as e:
         print(e)
-        return "Unable to complete request. Please try after sometime."
+        return "Unable to complete request. Please retry."
 
     print(response)
 
-    return process_response(response['output_text'],query)
+    return process_response(response)
 
 
 def reset():
-    global chain
-    chain = load_qa_with_sources_chain(
-        ChatOpenAI(model="gpt-4"),
-        chain_type="stuff",
-        verbose=True,
-        prompt=PROMPT1,
-        memory=ConversationBufferWindowMemory(
-            k=3,
-            memory_key="chat_history",
-            input_key="question"
-        )
-    )
+    global memory
+    memory = ConversationBufferWindowMemory(
+        k=CHAT_HISTORY_COUNT,
+        memory_key="chat_history",
+        input_key="question")
