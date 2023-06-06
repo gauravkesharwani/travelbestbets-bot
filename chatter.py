@@ -35,8 +35,7 @@ You never say you're a machine or an AI language model
 You provide package, deals and pricing information for any destination from context below only. Provide link to the source of the answer.
 Provide answer within 100 words.
 Do not provide more than two deals or packages in the answer.
-
-If you dont have an answer from below context, Provide this response ['output':'I dont know']
+If you don't have an answer from below context, Provide this response 'I don't know'
 Change new line character in response to <br>
 Enclose url in the url inside 'a' tag
 
@@ -132,7 +131,7 @@ def process_response(response):
 
         answer = response['output']
 
-        if 'I dont know' in answer:
+        if "I don't know" in answer:
             return '''I can't find a deal but one of our travel consultants would be happy to help you.<br> To get a 
                quote click here: <a href="https://travelbestbets.com/request-a-quote/">Request a quote</a> <br> Or feel free to contact our office: <br> ☎ 
                1-877-523-7823 <br> 📧 info@travelbestbets.com <br> And get our amazing deals sent right to your inbox. Sign 
@@ -140,7 +139,7 @@ def process_response(response):
                '''
 
         return answer
-    if 'I dont know' in response:
+    if "I don't know" in response:
         return '''I can't find a deal but one of our travel consultants would be happy to help you.<br> To get a 
         quote click here: https://travelbestbets.com/request-a-quote/ <br> Or feel free to contact our office: <br> ☎ 
         1-877-523-7823 <br> 📧 info@travelbestbets.com <br> And get our amazing deals sent right to your inbox. Sign 
