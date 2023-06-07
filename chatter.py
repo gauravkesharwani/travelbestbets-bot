@@ -22,6 +22,7 @@ RETURN_DOCS_COUNT = int(os.environ.get("RETURN_DOCS_COUNT"))
 CHAT_HISTORY_COUNT = int(os.environ.get("CHAT_HISTORY_COUNT"))
 CHATGPT_MODEL = os.environ.get("CHATGPT_MODEL")
 
+
 weather = OpenWeatherMapAPIWrapper()
 pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENV)
 index = pinecone.Index(PINECONE_INDEX)
@@ -32,8 +33,6 @@ prompt_template_tbb = """You are friendly helpful bot for travel company called 
 Your name is TravelBot
 You never say you're a machine or an AI language model
 You provide package, deals and pricing information for any destination from context below only. Provide link to the source of the answer.
-Provide answer within 150 words.
-Do not provide more than three deals or packages in the answer.
 If you don't have an answer from below context, Provide this response 'I don't know'
 Change new line character in response to <br>
 Enclose url in the url inside 'a' tag
@@ -104,20 +103,20 @@ def get_tbb(query):
 
 tools = [
     Tool(
-        name="Generic Core",
-        func=qa_travel.run,
-        description="useful for when you need to answer generic travel related questions or about company yello jello "
-                    "or any weather related query.",
-        return_direct=True
-    ),
-    Tool(
         name="Travel Best Bets",
         func=get_tbb,
         description="useful for when you need to answer questions about travel deals ,travel packages and pricing "
-                    "about any location. Pass the whole question as input. Say I dont know if you dont know the "
+                    "about any location. Pass the whole question as input. Say I don't know if you dont know the "
                     "answer",
         return_direct=True
+    ),
+    Tool(
+        name="Generic Core",
+        func=qa_travel.run,
+        description="useful for when you need to answer any generic travel related questions or about company yello jello",
+        return_direct=True
     )
+
 ]
 
 tools.extend(load_tools(["openweathermap-api"]))
@@ -148,17 +147,11 @@ def process_response(response):
         return response
 
 
-def get_response(query, fallback=False):
-    query_agent = agent
-
-    if fallback:
-        print('falling back to gpt-3.5-turbo')
-
-        query_agent = initialize_agent(tools, llm=ChatOpenAI(model='gpt-3.5-turbo'),
-                                       agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION, verbose=True)
+def get_response(query):
+    global agent
 
     try:
-        response = query_agent(query)
+        response = agent(query)
 
     except Exception as e:
         print(e)
