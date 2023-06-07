@@ -18,7 +18,8 @@ PINECONE_ENV = os.environ.get("PINECONE_ENV")
 PINECONE_INDEX = os.environ.get("PINECONE_INDEX")
 NAMESPACE_TBB = os.environ.get("NAMESPACE_TBB")
 NAMESPACE_CORE = os.environ.get("NAMESPACE_CORE")
-RETURN_DOCS_COUNT = int(os.environ.get("RETURN_DOCS_COUNT"))
+RETURN_DOCS_COUNT_CORE = int(os.environ.get("RETURN_DOCS_COUNT_CORE"))
+RETURN_DOCS_COUNT_TBB = int(os.environ.get("RETURN_DOCS_COUNT_TBB"))
 CHAT_HISTORY_COUNT = int(os.environ.get("CHAT_HISTORY_COUNT"))
 CHATGPT_MODEL = os.environ.get("CHATGPT_MODEL")
 
@@ -74,7 +75,7 @@ memory = ConversationBufferWindowMemory(
 qa_travel = RetrievalQA.from_chain_type(
     llm=llm,
     chain_type="stuff",
-    retriever=docsearch_Travel.as_retriever(search_kwargs={"k": RETURN_DOCS_COUNT}),
+    retriever=docsearch_Travel.as_retriever(search_kwargs={"k": RETURN_DOCS_COUNT_CORE}),
 
     chain_type_kwargs={
         "verbose": True,
@@ -86,7 +87,7 @@ qa_travel = RetrievalQA.from_chain_type(
 qa_BestBets = RetrievalQAWithSourcesChain.from_chain_type(
     llm=llm,
     chain_type="stuff",
-    retriever=docsearch_BestBets.as_retriever(search_kwargs={"k": RETURN_DOCS_COUNT}),
+    retriever=docsearch_BestBets.as_retriever(search_kwargs={"k": RETURN_DOCS_COUNT_TBB}),
     chain_type_kwargs={
         "verbose": True,
         "prompt": PROMPT_tbb,
