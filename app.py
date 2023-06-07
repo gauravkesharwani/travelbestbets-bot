@@ -26,9 +26,14 @@ def home():
 @app.route("/get")
 def get_bot_response():
     userText = request.args.get('msg')
+    fallback = request.args.get('fallback')
     logger.debug("Conversation Customer:" + userText)
 
-    response = chatter.get_response(userText)
+    if fallback:
+        response = chatter.get_response(userText, True)
+    else:
+        response = chatter.get_response(userText)
+
     logger.debug("Conversation Chatbot: " + response)
 
     return response

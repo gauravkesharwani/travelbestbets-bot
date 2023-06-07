@@ -22,7 +22,6 @@ RETURN_DOCS_COUNT = int(os.environ.get("RETURN_DOCS_COUNT"))
 CHAT_HISTORY_COUNT = int(os.environ.get("CHAT_HISTORY_COUNT"))
 CHATGPT_MODEL = os.environ.get("CHATGPT_MODEL")
 
-
 weather = OpenWeatherMapAPIWrapper()
 pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENV)
 index = pinecone.Index(PINECONE_INDEX)
@@ -149,11 +148,17 @@ def process_response(response):
         return response
 
 
-def get_response(query):
-    global agent
+def get_response(query, fallback=False):
+    query_agent = agent
+
+    if fallback:
+        print('falling back to gpt-3.5-turbo')
+
+        query_agent = initialize_agent(tools, llm=ChatOpenAI(model='gpt-3.5-turbo'),
+                                       agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION, verbose=True)
 
     try:
-        response = agent(query)
+        response = query_agent(query)
 
     except Exception as e:
         print(e)

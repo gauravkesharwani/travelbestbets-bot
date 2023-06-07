@@ -123,7 +123,7 @@
     function botResponse(rawText) {
 
       // Bot Response
-      $.get("/get", { msg: rawText }).done(function (data) {
+      $.get("/get", {msg: rawText}).done(function (data) {
         console.log(rawText);
         console.log(data);
         const msgText = data;
@@ -132,11 +132,29 @@
         textRemove.remove();
         appendMessage(BOT_NAME, BOT_IMG, "left", msgText);
 
-      }).fail(function() {
+      }).fail(function () {
 
         var textRemove = document.getElementById("thinking");
         textRemove.remove();
-        appendMessage(BOT_NAME, BOT_IMG, "left", 'Unable to complete request. Please retry.');
+        appendMessage(BOT_NAME, BOT_IMG, "left", 'I apologize for the delay in processing your query, I am working diligently to provide you with the best response. Thank you for your patience');
+
+        appendProcessingMessage(BOT_NAME, BOT_IMG, "left", '');
+        console.log('Falling back to gpt-3.5-turbo');
+
+        $.get("/get", { msg: rawText, fallback: True }).done(function (data) {
+
+          console.log(data);
+          const msgText = data;
+
+          var textRemove = document.getElementById("thinking");
+          textRemove.remove();
+          appendMessage(BOT_NAME, BOT_IMG, "left", msgText);
+
+        });
+
+
+
+
       });
 
     }
