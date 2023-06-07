@@ -141,7 +141,7 @@
         appendProcessingMessage(BOT_NAME, BOT_IMG, "left", '');
         console.log('Falling back to gpt-3.5-turbo');
 
-        $.get("/get", { msg: rawText, fallback: True }).done(function (data) {
+        $.get("/get", { msg: rawText, fallback: 'True' }).done(function (data) {
 
           console.log(data);
           const msgText = data;
