@@ -106,7 +106,7 @@ tools = [
     Tool(
         name="Travel Best Bets",
         func=get_tbb,
-        description="useful for when you need to answer questions about travel deals ,travel packages and pricing "
+        description="useful for when you need to answer questions about travel deals ,travel packages, family deals, kids deals and pricing "
                     "about any location. Pass the whole question as input. Say I don't know if you dont know the "
                     "answer",
         return_direct=True
