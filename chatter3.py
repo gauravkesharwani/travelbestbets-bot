@@ -1,54 +1,41 @@
-from langchain.agents import ZeroShotAgent, Tool, AgentExecutor, load_tools
-from langchain.memory import ConversationBufferMemory, ConversationBufferWindowMemory
-from langchain import OpenAI, LLMChain, PromptTemplate
-from langchain.utilities import GoogleSearchAPIWrapper, OpenWeatherMapAPIWrapper
-from langchain.chat_models import ChatOpenAI
 import os
 from dotenv import load_dotenv
+from langchain import LLMChain, PromptTemplate
+from langchain.agents import Tool, load_tools, initialize_agent, AgentType
+from langchain.chat_models import ChatOpenAI
+from langchain.memory import ConversationBufferWindowMemory
+from langchain.utilities import GoogleSearchAPIWrapper, OpenWeatherMapAPIWrapper
 
 load_dotenv()
 
 weather = OpenWeatherMapAPIWrapper()
 CHATGPT_MODEL = os.environ.get("CHATGPT_MODEL")
+search = GoogleSearchAPIWrapper()
 
 
 def search_tbb(query):
     query = f'travelbestbets.com {query}'
     result_text = search.run(query)
-    result_link = search.results(query, 1)[0]['link']
-    return f'{result_text} {result_link}'
+    result_link = search.results(query, 3)[0]['link']
+    result_link2 = search.results(query, 3)[1]['link']
+    result_link3 = search.results(query, 3)[2]['link']
+
+    return f'{result_text} source:{result_link} {result_link2} {result_link3}'
 
 
-template = """
-You are a bot travel agents for travelbestbets called TravelBot.
-Always Answer the following questions with itinerary and pricing information.
-If you don't have the answer , say 'I don't know'
-Change new line character in response to <br>
-Enclose url in the url inside 'a' tag
-
-{chat_history}
-
-human: {input}:
-"""
-
-prompt = PromptTemplate(
-    input_variables=["input", "chat_history"],
-    template=template
-)
-memory = ConversationBufferWindowMemory(memory_key="chat_history", k=2)
-
-search = GoogleSearchAPIWrapper()
 tools = [
     Tool(
         name="TravelBestBets",
         func=search_tbb,
-        description="useful for when you need to answer questions about travel packages and deals. Provide source link with answer.",
+        description="useful for when you need to answer questions about travel packages and deals. Provide full query into the tool. Provide source link with answer.",
+        return_direct=True
 
     ),
     Tool(
         name="Google",
         func=search.run,
         description="useful when you need to answer any other question.Do not use for travel deal related questions",
+        return_direct=True
 
     )
 
@@ -56,46 +43,43 @@ tools = [
 
 tools.extend(load_tools(["openweathermap-api"]))
 
-prefix = """You are a bot travel agents for travelbestbets called TravelBot.
-Always Answer the following questions with itinerary and pricing information. 
-If you don't have the answer , say 'I don't know'
-Change new line character in response to <br>
-Enclose url in the url inside 'a' tag
-You have access to the following tools:"""
-suffix = """Begin!"
-
-{chat_history}
-Question: {input}
-{agent_scratchpad}"""
-
-prompt = ZeroShotAgent.create_prompt(
-    tools,
-    prefix=prefix,
-    suffix=suffix,
-    input_variables=["input", "chat_history", "agent_scratchpad"]
-)
-
 llm = ChatOpenAI(model=CHATGPT_MODEL)
 
-llm_chain = LLMChain(llm=llm, prompt=prompt)
-agent = ZeroShotAgent(llm_chain=llm_chain, tools=tools, verbose=True, max_iterations=1)
-agent_chain = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=True, memory=memory)
+agent = initialize_agent(tools, llm, agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION, verbose=True)
+
+template = """You are a bot travel agents for travelbestbets called TravelBot.
+Always answer the questions from only the context below with itinerary and pricing information. 
+Do not make up any answer
+If you don't have the answer , say 'I don't know'
+
+Include source link in inside 'a' tag
+Change new line character in response to <br>
+
+Context:
+{context}
+
+
+Human: {human_input}
+Chatbot:"""
+
+prompt = PromptTemplate(
+    #input_variables=["chat_history", "human_input", "context"],
+    input_variables=["human_input", "context"],
+    template=template
+)
+memory = ConversationBufferWindowMemory(memory_key="chat_history", input_key="human_input", k=2)
+llm_chain = LLMChain(
+    llm=llm,
+    prompt=prompt,
+    verbose=True,
+    #memory=memory,
+)
 
 
 def process_response(response):
-    if 'output' in response:
 
-        answer = response['output']
-
-        if "I don't know" in answer:
-            return '''I can't find a deal but one of our travel consultants would be happy to help you.<br> To get a 
-               quote click here: <a href="https://travelbestbets.com/request-a-quote/">Request a quote</a> <br> Or feel free to contact our office: <br> ☎ 
-               1-877-523-7823 <br> 📧 info@travelbestbets.com <br> And get our amazing deals sent right to your inbox. Sign 
-               up for our weekly Travel Best Bets Newsletter here: <a href="https://travelbestbets.com/services/best-bets-newsletter/">Newsletter</a> 
-               '''
-
-        return answer
-    if "I don't know" in response:
+    if "I don't" in response:
+        print('found i dont know')
         return '''I can't find a deal but one of our travel consultants would be happy to help you.<br> To get a 
         quote click here: https://travelbestbets.com/request-a-quote/ <br> Or feel free to contact our office: <br> ☎ 
         1-877-523-7823 <br> 📧 info@travelbestbets.com <br> And get our amazing deals sent right to your inbox. Sign 
@@ -106,10 +90,13 @@ def process_response(response):
 
 
 def get_response(query):
-    global agent_chain
+    global llm_chain
 
     try:
-        response = agent_chain.run(query)
+
+        agent_response = agent.run(input=query)
+
+        response = llm_chain.run({'context': agent_response, 'human_input': query})
 
     except Exception as e:
         print(e)
