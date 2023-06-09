@@ -23,7 +23,18 @@ def search_tbb(query):
     return f'{result_text} source:{result_link} {result_link2} {result_link3}'
 
 
+def greeter(query):
+    return query
+
+
 tools = [
+    Tool(
+        name="Greeter",
+        func=greeter,
+        description="useful when user greets and non travel related queries.",
+        return_direct=True
+
+    ),
     Tool(
         name="TravelBestBets",
         func=search_tbb,
@@ -63,7 +74,7 @@ Human: {human_input}
 Chatbot:"""
 
 prompt = PromptTemplate(
-    #input_variables=["chat_history", "human_input", "context"],
+    # input_variables=["chat_history", "human_input", "context"],
     input_variables=["human_input", "context"],
     template=template
 )
@@ -72,12 +83,11 @@ llm_chain = LLMChain(
     llm=llm,
     prompt=prompt,
     verbose=True,
-    #memory=memory,
+    # memory=memory,
 )
 
 
 def process_response(response):
-
     if "I don't" in response:
         print('found i dont know')
         return '''I can't find a deal but one of our travel consultants would be happy to help you.<br> To get a 
