@@ -4,12 +4,11 @@ from langchain import OpenAI, LLMChain, PromptTemplate
 from langchain.utilities import GoogleSearchAPIWrapper, OpenWeatherMapAPIWrapper
 from langchain.chat_models import ChatOpenAI
 import os
+from dotenv import load_dotenv
 
-os.environ["OPENWEATHERMAP_API_KEY"] = "5f6fbfcf69197199e0a7be83b0ece284"
+load_dotenv()
+
 weather = OpenWeatherMapAPIWrapper()
-os.environ['OPENAI_API_KEY'] = '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'
-os.environ["GOOGLE_CSE_ID"] = "02e43adfd0be4422e"
-os.environ["GOOGLE_API_KEY"] = "AIzaSyBtmpcb4KqSD6WI3Y19ijZPVftlw_trKYU"
 
 
 def search_tbb(query):
@@ -73,7 +72,6 @@ prompt = ZeroShotAgent.create_prompt(
     input_variables=["input", "chat_history", "agent_scratchpad"]
 )
 
-
 llm = ChatOpenAI(model='gpt-4')
 
 llm_chain = LLMChain(llm=llm, prompt=prompt)
@@ -122,5 +120,3 @@ def get_response(query):
 def reset():
     global memory
     memory = ConversationBufferWindowMemory(memory_key="chat_history", k=2)
-
-

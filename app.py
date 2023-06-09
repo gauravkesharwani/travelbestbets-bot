@@ -1,4 +1,4 @@
-import chatter
+import chatter3
 import logging
 from flask import Flask, render_template, request
 
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 @app.route("/")
 def home():
-    chatter.reset()
+    chatter3.reset()
     return render_template("index.html")
 
 
@@ -30,9 +30,9 @@ def get_bot_response():
     logger.debug("Conversation Customer:" + userText)
 
     if fallback:
-        response = chatter.get_response(userText, True)
+        response = chatter3.get_response(userText, True)
     else:
-        response = chatter.get_response(userText)
+        response = chatter3.get_response(userText)
 
     logger.debug("Conversation Chatbot: " + response)
 
