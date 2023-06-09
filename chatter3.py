@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 weather = OpenWeatherMapAPIWrapper()
+CHATGPT_MODEL = os.environ.get("CHATGPT_MODEL")
 
 
 def search_tbb(query):
@@ -22,7 +23,8 @@ template = """
 You are a bot travel agents for travelbestbets called TravelBot.
 Always Answer the following questions with itinerary and pricing information.
 If you don't have the answer , say 'I don't know'
-Include source link in inside 'a' tag
+Change new line character in response to <br>
+Enclose url in the url inside 'a' tag
 
 {chat_history}
 
@@ -57,7 +59,8 @@ tools.extend(load_tools(["openweathermap-api"]))
 prefix = """You are a bot travel agents for travelbestbets called TravelBot.
 Always Answer the following questions with itinerary and pricing information. 
 If you don't have the answer , say 'I don't know'
-Include source link in inside 'a' tag
+Change new line character in response to <br>
+Enclose url in the url inside 'a' tag
 You have access to the following tools:"""
 suffix = """Begin!"
 
@@ -72,7 +75,7 @@ prompt = ZeroShotAgent.create_prompt(
     input_variables=["input", "chat_history", "agent_scratchpad"]
 )
 
-llm = ChatOpenAI(model='gpt-4')
+llm = ChatOpenAI(model=CHATGPT_MODEL)
 
 llm_chain = LLMChain(llm=llm, prompt=prompt)
 agent = ZeroShotAgent(llm_chain=llm_chain, tools=tools, verbose=True, max_iterations=1)
@@ -110,7 +113,7 @@ def get_response(query):
 
     except Exception as e:
         print(e)
-        return "Unable to complete request. Please retry."
+        return "Unable to complete request."
 
     print(response)
 
