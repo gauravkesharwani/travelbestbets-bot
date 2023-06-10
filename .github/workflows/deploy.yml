@@ -22,4 +22,7 @@ jobs:
 
       - name: SSH into EC2 and execute script
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/key.pem ubuntu@ec2-54-221-10-78.compute-1.amazonaws.com 'bash -s' < deploy.sh
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/key.pem ubuntu@ec2-54-221-10-78.compute-1.amazonaws.com << EOF
+            cd ~
+            bash deploy.sh
+          EOF
