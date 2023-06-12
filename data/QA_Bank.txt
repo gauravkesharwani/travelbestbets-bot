@@ -29,7 +29,7 @@ question:I’m looking for a river cruise on the Danube
 answer: https://travelbestbets.com/deals/ama-waterways-blue-danube/
 
 question:What is the cheapest cruise doing the Mediterranean
-answer: https://travelbestbets.com/deals/rci-greek-isles/
+answer: https://travelbestbets.com/cruises-2/europe-mediterranean-cruises/
 
 question:I want to go to Peru what are some options
 answer: https://travelbestbets.com/guided-vacations/central-south-america/
