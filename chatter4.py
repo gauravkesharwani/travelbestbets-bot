@@ -9,9 +9,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
 CHATGPT_MODEL = os.environ.get("CHATGPT_MODEL")
-
 
 SimpleDirectoryReader = download_loader("SimpleDirectoryReader")
 loader = SimpleDirectoryReader('./data', recursive=True, exclude_hidden=True)
@@ -21,10 +19,20 @@ weather = OpenWeatherMapAPIWrapper()
 google = GoogleSearchAPIWrapper()
 
 
-def search_google_with_source(query):
-    result_text = google.run(query)
-    result_link = google.results(query, 1)[0]['link']
-    return f'{result_text} source:{result_link}'
+def search_google_with_source(url, query):
+    if url == 'https://travelbestbets.com':
+        result_link = google.results(query, 1)[0]['link']
+    else:
+        result_link = url
+
+    search_term = f'{url} {query}'
+    print(search_term)
+
+    result_text = google.run(search_term)
+
+    response = f'{result_text} source:{result_link}'
+    print(response)
+    return response
 
 
 llm = ChatOpenAI(temperature=0, model=CHATGPT_MODEL)
@@ -45,14 +53,14 @@ Answer:
 PROMPT_LOOKUP = PromptTemplate(
     template=prompt_url_lookup, input_variables=["context", "question"]
 )
-chain_lookup = load_qa_chain(ChatOpenAI(temperature=0, model='gpt-4'), chain_type="stuff", prompt=PROMPT_LOOKUP)
+chain_lookup = load_qa_chain(llm, chain_type="stuff", prompt=PROMPT_LOOKUP)
 
 prompt_tbb_deal = """You are a bot travel agents for travelbestbets called TravelBot.
 Always answer the questions from only the context below with itinerary and pricing information. 
-Do not make up any answer
-If you don't have the answer , say 'I don't know'
-Include source link in inside <a> tag with target="_blank"
-Do not provide any other email other than info@travelbestbet.com 
+Do not make up any answer.
+If you don't have the answer in the context say 'I don't know'
+Include source link in inside <a> tag with target="_blank".
+Do not provide any other email other than info@travelbestbets.com 
 Do not provide any other link other than from travelbestbets
 Change new line character in response to <br>
 
@@ -100,11 +108,11 @@ def search_tbb(query):
     url = chain_lookup({"input_documents": documents, "question": query}, return_only_outputs=True)['output_text']
 
     if "don't" in url:
-        url = 'travelbestbets.com'
+        url = 'https://travelbestbets.com'
 
     print(url)
 
-    deal_info = search_google_with_source(f'{url} {query}')
+    deal_info = search_google_with_source(url, query)
     fa = chain_tbb_deal({"context": deal_info, "question": query})['text']
     return fa
 
@@ -154,6 +162,7 @@ tools = [
 tools.extend(load_tools(["openweathermap-api"]))
 agent = initialize_agent(tools, llm, agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION, verbose=True)
 
+
 def process_response(response):
     if "don't" in response:
         print('found i dont know')
@@ -180,7 +189,6 @@ def get_response(query):
 
     return process_response(agent_response)
 
-
-#def reset():
-    #global memory
-    #memory = ConversationBufferWindowMemory(memory_key="chat_history", k=2)
+# def reset():
+# global memory
+# memory = ConversationBufferWindowMemory(memory_key="chat_history", k=2)
