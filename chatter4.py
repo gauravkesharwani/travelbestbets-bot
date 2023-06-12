@@ -37,10 +37,12 @@ def search_google_with_source(url, query):
 
 llm = ChatOpenAI(temperature=0, model=CHATGPT_MODEL)
 
-prompt_url_lookup = """Provide url for any trip , deal related question to any destination from context below only.
-Do not make up any answer. 
-If you context dosent have the answer, just say that you don't know.
+prompt_url_lookup = """Provide url for any trip , deal, tour related question to any destination from context below only.
+Do not make up any answer.
+Answer truthfully. 
+If context doesn't have the answer just say that 'I don't know'.
 
+Context:
 {context}
 
 Question: what are some good longstay trips to Europe
@@ -61,7 +63,7 @@ Do not make up any answer.
 If you don't have the answer in the context say 'I don't know'
 Include source link in inside <a> tag with target="_blank".
 Do not provide any other email other than info@travelbestbets.com 
-Do not provide any other link other than from travelbestbets
+Do not provide any other link other than from travelbestbets.
 Change new line character in response to <br>
 
 
@@ -104,10 +106,20 @@ chain_search_google = LLMChain(
 )
 
 
+def check_words_in_string(string):
+    words_to_check = ["dont", "sorry", "don't"]
+    for word in words_to_check:
+        if word in string:
+            return True
+    return False
+
+
 def search_tbb(query):
     url = chain_lookup({"input_documents": documents, "question": query}, return_only_outputs=True)['output_text']
 
-    if "don't" in url:
+    print(f'lookup result: {url}')
+
+    if check_words_in_string(url):
         url = 'https://travelbestbets.com'
 
     print(url)
@@ -127,12 +139,6 @@ def greeter(query):
     fa = chain_search_google({"context": '', "question": query})['text']
     return fa
 
-
-search_tbb('any deal to mexico')
-
-search_google('best restaurant in milan')
-
-greeter('hello')
 
 tools = [
     Tool(
@@ -164,7 +170,7 @@ agent = initialize_agent(tools, llm, agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRI
 
 
 def process_response(response):
-    if "don't" in response:
+    if check_words_in_string(response):
         print('found i dont know')
         return '''I can't find a deal but one of our travel consultants would be happy to help you.<br> To get a 
         quote click here: https://travelbestbets.com/request-a-quote/ <br> Or feel free to contact our office: <br> ☎ 
