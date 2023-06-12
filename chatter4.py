@@ -21,7 +21,7 @@ google = GoogleSearchAPIWrapper()
 
 def search_google_with_source(url, query):
     if url == 'https://travelbestbets.com':
-        result_link = google.results(query, 1)[0]['link']
+        result_link = google.results(f'{url} {query}', 1)[0]['link']
     else:
         result_link = url
 
