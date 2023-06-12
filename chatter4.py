@@ -45,7 +45,7 @@ Answer:
 PROMPT_LOOKUP = PromptTemplate(
     template=prompt_url_lookup, input_variables=["context", "question"]
 )
-chain_lookup = load_qa_chain(llm, chain_type="stuff", prompt=PROMPT_LOOKUP)
+chain_lookup = load_qa_chain(ChatOpenAI(temperature=0, model='gpt-4'), chain_type="stuff", prompt=PROMPT_LOOKUP)
 
 prompt_tbb_deal = """You are a bot travel agents for travelbestbets called TravelBot.
 Always answer the questions from only the context below with itinerary and pricing information. 
