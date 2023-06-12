@@ -43,6 +43,66 @@ answer: https://travelbestbets.com/special-interest-trips/longstay-holidays/
 question: any deals for greece this year
 answer: https://travelbestbets.com/deals/best-of-greece/
 
+question: looking for bali deal
+answer https://travelbestbets.com/deals/bali-indonesia-1/
+
+question: Want to go to mexico in nov
+general answer: https://travelbestbets.com/travel-destinations/mexico-caribbean/
+
+question: looking to go to the caribbean
+answer: https://travelbestbets.com/travel-destinations/mexico-caribbean/
+
+question: Looking to go to disneyland
+answer: https://travelbestbets.com/deals/anaheim-california-6/
+
+question: best deal to New york
+answer: https://travelbestbets.com/deals/new-york-1/
+
+question: do you have driving packages 
+answer: https://travelbestbets.com/special-interest-trips/self-drive-tours/
+
+question: looking for luxury packages
+answer: https://travelbestbets.com/luxury-travel/
+
+question: deals to vegas
+answer: https://travelbestbets.com/deals/las-vegas-nevada-5/
+
+question: deals to costa rica
+answer: https://travelbestbets.com/?s=costa+rica
+
+question: Looking to go to hawaii
+answer: https://travelbestbets.com/?s=hawaii
+
+question: what is the cheapest deal on guided tours to Asia?
+answer: https://travelbestbets.com/deals/classic-vietnam-hanoi-to-ho-chi-minh-city/
+
+question: what is the cheapest deal for guided tour in Europe?
+answer: https://travelbestbets.com/deals/greek-escape/
+
+question: cheapest deal on guided tour to Africa
+answer: https://travelbestbets.com/deals/northern-morocco/
+
+question: do you have any wellness tour to Bali?
+answer: https://travelbestbets.com/deals/wellness-bali/
+
+question: what is the cheapest deal for guided tour to Australia
+answer: https://travelbestbets.com/deals/contrasts-of-australia/
+
+question: cheapest deal on guided tours to South America
+answer: https://travelbestbets.com/deals/trek-or-train-machu-picchu/
+
+question: what is the cheapest deal for a guided tour in Hawaii?
+answer: https://travelbestbets.com/deals/hawaii-islands/
+
+question: the best deal for a guided tour to Italy
+answer: https://travelbestbets.com/deals/gourmet-tuscany/
+
+question: what is the cheapest deal for a guided tour in middle east
+answer: https://travelbestbets.com/deals/explore-dubai/
+
+question: what is the best deal in luxury guided tour?
+answer: https://travelbestbets.com/deals/amazing-spain-and-portugal
+
 
 
 

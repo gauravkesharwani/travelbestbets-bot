@@ -69,7 +69,7 @@ PROMPT_TBB_DEAL = PromptTemplate(
     template=prompt_tbb_deal, input_variables=["context", "question"]
 )
 chain_tbb_deal = LLMChain(
-    llm=llm,
+    llm=ChatOpenAI(temperature=0, model='gpt-4'),
     prompt=PROMPT_TBB_DEAL
 )
 
