@@ -115,6 +115,10 @@ answer: https://travelbestbets.com/deals/kelowna-wine-getaway/
 question: What is the cheapest deal to Kelowna?
 answer: https://travelbestbets.com/deals/kelowna-wine-getaway/
 
+question: deals for trips within canada?
+answer: https://travelbestbets.com/travel-destinations/canada/
+
+
 
 
 
