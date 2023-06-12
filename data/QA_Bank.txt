@@ -1,0 +1,49 @@
+question: do you have a cruise to the Mediterranean with air included
+answer: https://travelbestbets.com/deals/oceania-mediterranean-2/
+
+question: I'm looking for a cheap all-inclusive to Mexico
+answer: https://travelbestbets.com/deals/puerto-vallarta-mexico/
+
+question: What is a good package for families to Anaheim
+answer: https://travelbestbets.com/deals/anaheim-california-6/
+
+question: what is the best deal for an all-inclusive to Mexico over Christmas
+answer: https://travelbestbets.com/special-interest-trips/christmas-new-years/
+
+question: what are some good longstay trips to Europe
+answer: https://travelbestbets.com/special-interest-trips/longstay-holidays/
+
+question: what is the best deal to Hawaii right now
+answer: https://travelbestbets.com/travel-destinations/hawaii-south-pacific/
+
+question:i want do a cruise in Asia that visits Japan
+answer: https://travelbestbets.com/deals/pcl-diamond-japan-cruise/
+
+question:Do you have a luxury all-inclusive to Riviera Maya
+answer: https://travelbestbets.com/deals/riviera-maya-mexico/
+
+question:What is the cheapest deal to Honolulu in November
+answer: https://travelbestbets.com/deals/honolulu-hawaii-2/
+
+question:I’m looking for a river cruise on the Danube
+answer: https://travelbestbets.com/deals/ama-waterways-blue-danube/
+
+question:What is the cheapest cruise doing the Mediterranean
+answer: https://travelbestbets.com/deals/rci-greek-isles/
+
+question:I want to go to Peru what are some options
+answer: https://travelbestbets.com/guided-vacations/central-south-america/
+
+question: how much for a trip to Las Vegas with air & hotel
+answer: https://travelbestbets.com/deals/las-vegas-nevada-5/
+
+question: do you have any long stay trips
+answer: https://travelbestbets.com/special-interest-trips/longstay-holidays/
+
+question: any deals for greece this year
+answer: https://travelbestbets.com/deals/best-of-greece/
+
+
+
+
+
