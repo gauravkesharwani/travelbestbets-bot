@@ -13,17 +13,11 @@ answer: https://travelbestbets.com/special-interest-trips/christmas-new-years/
 question: what are some good longstay trips to Europe
 answer: https://travelbestbets.com/special-interest-trips/longstay-holidays/
 
-question: what is the best deal to Hawaii right now
-answer: https://travelbestbets.com/travel-destinations/hawaii-south-pacific/
-
 question:i want do a cruise in Asia that visits Japan
 answer: https://travelbestbets.com/deals/pcl-diamond-japan-cruise/
 
 question:Do you have a luxury all-inclusive to Riviera Maya
 answer: https://travelbestbets.com/deals/riviera-maya-mexico/
-
-question:What is the cheapest deal to Honolulu in November
-answer: https://travelbestbets.com/deals/honolulu-hawaii-2/
 
 question:I’m looking for a river cruise on the Danube
 answer: https://travelbestbets.com/deals/ama-waterways-blue-danube/
@@ -70,9 +64,6 @@ answer: https://travelbestbets.com/deals/las-vegas-nevada-5/
 question: deals to costa rica
 answer: https://travelbestbets.com/?s=costa+rica
 
-question: Looking to go to hawaii
-answer: https://travelbestbets.com/?s=hawaii
-
 question: what is the cheapest deal on guided tours to Asia?
 answer: https://travelbestbets.com/deals/classic-vietnam-hanoi-to-ho-chi-minh-city/
 
@@ -90,9 +81,6 @@ answer: https://travelbestbets.com/deals/contrasts-of-australia/
 
 question: cheapest deal on guided tours to South America
 answer: https://travelbestbets.com/deals/trek-or-train-machu-picchu/
-
-question: what is the cheapest deal for a guided tour in Hawaii?
-answer: https://travelbestbets.com/deals/hawaii-islands/
 
 question: the best deal for a guided tour to Italy
 answer: https://travelbestbets.com/deals/gourmet-tuscany/
@@ -117,6 +105,24 @@ answer: https://travelbestbets.com/deals/kelowna-wine-getaway/
 
 question: deals for trips within canada?
 answer: https://travelbestbets.com/travel-destinations/canada/
+
+question:What is the cheapest deal to Honolulu in November
+answer: https://travelbestbets.com/deals/honolulu-hawaii-2/
+
+question:What is the cheapest deal Hawaii
+answer: https://travelbestbets.com/deals/honolulu-hawaii-2/
+
+question: what is the cheapest deal for a guided tour in Hawaii?
+answer: https://travelbestbets.com/deals/hawaii-islands/
+
+question: Looking to go to hawaii
+answer: https://travelbestbets.com/?s=hawaii
+
+question: what is the best deal to Hawaii right now
+answer: https://travelbestbets.com/travel-destinations/hawaii-south-pacific/
+
+question: do you have deals to Ireland
+answer: https://travelbestbets.com/deals/dublin-belfast-ireland/
 
 
 

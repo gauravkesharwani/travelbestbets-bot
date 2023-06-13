@@ -29,6 +29,7 @@ def search_google_with_source(url, query):
     print(search_term)
 
     result_text = google.run(search_term)
+    # result_text = ddg.run(search_term)
 
     response = f'{result_text} source:{result_link}'
     print(response)
@@ -64,6 +65,7 @@ If you don't have the answer in the context say 'I don't know'
 Include source link in inside <a> tag with target="_blank".
 Do not provide any other email other than info@travelbestbets.com 
 Do not provide any other link other than from travelbestbets.
+Italy & Greek isles cruise is part of mediterranean cruise
 Change new line character in response to <br>
 
 
@@ -115,6 +117,9 @@ def check_words_in_string(string):
 
 
 def search_tbb(query):
+    if "mediterranean" in query.lower() and "cruise" in query.lower():
+        query = f'{query} and greek isles'
+
     url = chain_lookup({"input_documents": documents, "question": query}, return_only_outputs=True)['output_text']
 
     print(f'lookup result: {url}')
