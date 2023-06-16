@@ -22,7 +22,7 @@ def home():
    return render_template("index.html")
 
 
-@app.route("/get")
+@app.route("/chat")
 def get_bot_response():
     userText = request.args.get('msg')
 

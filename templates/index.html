@@ -164,7 +164,7 @@
 
 
       // Bot Response
-      $.get("/get", { msg: rawText }).done(function (data) {
+      $.get("/chat", { msg: rawText }).done(function (data) {
         console.log(rawText);
         console.log(data);
         const msgText = data;
