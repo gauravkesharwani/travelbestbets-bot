@@ -91,10 +91,10 @@ answer: https://travelbestbets.com/deals/explore-dubai/
 question: what is the best deal in luxury guided tour?
 answer: https://travelbestbets.com/deals/amazing-spain-and-portugal
 
-question: what is the best deal to Italy?
+question: what is the best deal to Italy
 answer: https://travelbestbets.com/deals/agropoli-italy-seaside-escape/
 
-question: what is the cheapest deal to italy?
+question: what is the cheapest deal to italy
 answer: https://travelbestbets.com/deals/agropoli-italy-seaside-escape/
 
 question: do you have a deal to Kelowna?
@@ -123,6 +123,16 @@ answer: https://travelbestbets.com/travel-destinations/hawaii-south-pacific/
 
 question: do you have deals to Ireland
 answer: https://travelbestbets.com/deals/dublin-belfast-ireland/
+
+question: tour package to Bali
+answer: travelbestbets.com/deals/bali-indonesia-1/
+
+question: what is the cheapest package to london
+answer: travelbestbets.com/deals/london-england-4/
+
+
+
+
 
 
 

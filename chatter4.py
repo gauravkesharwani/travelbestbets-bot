@@ -3,7 +3,7 @@ from langchain.agents import Tool, load_tools, initialize_agent, AgentType
 from langchain.chains.question_answering import load_qa_chain, LLMChain
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
-from langchain.utilities import GoogleSearchAPIWrapper, OpenWeatherMapAPIWrapper
+from langchain.utilities import GoogleSearchAPIWrapper, OpenWeatherMapAPIWrapper, GoogleSerperAPIWrapper
 from llama_index import download_loader
 from dotenv import load_dotenv
 
@@ -17,15 +17,16 @@ documents = loader.load_langchain_documents()
 
 weather = OpenWeatherMapAPIWrapper()
 google = GoogleSearchAPIWrapper()
+serper = GoogleSerperAPIWrapper()
 
 
 def search_google_with_source(url, query):
-    if url == 'https://travelbestbets.com':
-        result_link = google.results(f'{url} {query}', 1)[0]['link']
+    if url == 'travelbestbets.com':
+        result_link = google.results(f'{url} + {query}', 1)[0]['link']
     else:
         result_link = url
 
-    search_term = f'{url} {query}'
+    search_term = f'{url} + {query}'
     print(search_term)
 
     result_text = google.run(search_term)
@@ -36,9 +37,22 @@ def search_google_with_source(url, query):
     return response
 
 
+def search_serper_with_source(url, query):
+    search_term = f'{url} + {query}'
+
+    print(f'Searching Serper:{search_term}')
+    result_text = serper.run(search_term)
+    result_link = serper.results(search_term)['organic'][0]['link']
+
+    response = f'{result_text} source:{result_link}'
+
+    print(response)
+    return response
+
+
 llm = ChatOpenAI(temperature=0, model=CHATGPT_MODEL)
 
-prompt_url_lookup = """Provide url for any trip , deal, tour related question to any destination from context below only.
+prompt_url_lookup = """Provide url for any trip , deal, package tour related question to any destination from context below only.
 Do not make up any answer.
 Answer truthfully. 
 If context doesn't have the answer just say that 'I don't know'.
@@ -47,7 +61,7 @@ Context:
 {context}
 
 Question: what are some good longstay trips to Europe
-Answer : https://travelbestbets.com/special-interest-trips/longstay-holidays/
+Answer : travelbestbets.com/special-interest-trips/longstay-holidays/
 Question: {question}
 Answer: 
 
@@ -59,7 +73,7 @@ PROMPT_LOOKUP = PromptTemplate(
 chain_lookup = load_qa_chain(llm, chain_type="stuff", prompt=PROMPT_LOOKUP)
 
 prompt_tbb_deal = """You are a bot travel agents for travelbestbets called TravelBot.
-Always answer the questions from only the context below with itinerary and pricing information. 
+Always answer the questions regarding travel deals and packages from only the context below with itinerary and pricing information. 
 Do not make up any answer.
 If you don't have the answer in the context say 'I don't know'
 Include source link in inside <a> tag with target="_blank".
@@ -81,7 +95,7 @@ PROMPT_TBB_DEAL = PromptTemplate(
     template=prompt_tbb_deal, input_variables=["context", "question"]
 )
 chain_tbb_deal = LLMChain(
-    llm=ChatOpenAI(temperature=0, model='gpt-4'),
+    llm=ChatOpenAI(temperature=0, model='gpt-4-0613'),
     prompt=PROMPT_TBB_DEAL
 )
 
@@ -104,7 +118,9 @@ PROMPT_SEARCH_GOOGLE = PromptTemplate(
 )
 chain_search_google = LLMChain(
     llm=llm,
-    prompt=PROMPT_SEARCH_GOOGLE
+    prompt=PROMPT_SEARCH_GOOGLE,
+    verbose=True
+
 )
 
 
@@ -125,18 +141,26 @@ def search_tbb(query):
     print(f'lookup result: {url}')
 
     if check_words_in_string(url):
-        url = 'https://travelbestbets.com'
+        url = 'travelbestbets.com'
 
     print(url)
 
-    deal_info = search_google_with_source(url, query)
+    deal_info = search_serper_with_source(url, query)
+
     fa = chain_tbb_deal({"context": deal_info, "question": query})['text']
     return fa
 
 
 def search_google(query):
-    result_text = google.run(query)
+    result_text = serper.run(query)
     fa = chain_search_google({"context": result_text, "question": query})['text']
+    return fa
+
+
+def search_weather(query):
+    global current_query
+    result_text = weather.run(query)
+    fa = chain_search_google({"context": result_text, "question": current_query})['text']
     return fa
 
 
@@ -156,7 +180,7 @@ tools = [
     Tool(
         name="TravelBestBets",
         func=search_tbb,
-        description="useful for when you need to answer questions about travel packages and deals. Provide full query into the tool. Provide source link with answer.",
+        description="useful for when you need to answer questions about travel packages and deals. Pass full query into the tool. Provide source link with answer.",
         return_direct=True
 
     ),
@@ -166,7 +190,14 @@ tools = [
         description="useful when you need to answer any other question.Do not use for travel deal related questions",
         return_direct=True
 
-    )
+    ),
+    # Tool(
+    #     name="Weather",
+    #     func=search_weather,
+    #     description="useful when you need to answer about weather, temperature about any location.Only pass location to the tool",
+    #     return_direct=True
+    #
+    # )
 
 ]
 
@@ -188,6 +219,9 @@ def process_response(response):
 
 def get_response(query):
     global agent
+    global current_query
+
+    current_query = query
 
     try:
 
