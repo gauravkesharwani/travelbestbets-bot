@@ -45,7 +45,7 @@ def search_serper_with_source(url, query):
     result_link = serper.results(search_term)['organic'][0]['link']
 
     if 'travelbestbets.com' not in result_link:
-        result_link = 'xyz.com'
+        result_link = 'http://www.xyz.com'
 
     response = f'{result_text} source:{result_link}'
 
@@ -214,8 +214,8 @@ def process_response(response):
         1-877-523-7823 <br> 📧 info@travelbestbets.com <br> And get our amazing deals sent right to your inbox. Sign 
         up for our weekly Travel Best Bets Newsletter here: <a href="https://travelbestbets.com/services/best-bets-newsletter/" target="_blank">Newsletter</a>
         '''
-    elif '<a href="xyz.com" target="_blank">source</a>' in response:
-        return response.replace('<a href="xyz.com" target="_blank">source</a>', """<br>One of our travel consultants would be happy to help you.<br> To get a 
+    elif 'xyz.com' in response:
+        return response.replace('<a href="http://www.xyz.com" target="_blank">source</a>', """<br>One of our travel consultants would be happy to help you.<br> To get a 
         quote click here: <a href="https://travelbestbets.com/request-a-quote/" target="_blank">Request a quote</a>  <br> Or feel free to contact our office: <br> ☎ 
         1-877-523-7823 <br> 📧 info@travelbestbets.com """)
     else:
