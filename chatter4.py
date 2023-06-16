@@ -44,6 +44,9 @@ def search_serper_with_source(url, query):
     result_text = serper.run(search_term)
     result_link = serper.results(search_term)['organic'][0]['link']
 
+    if 'travelbestbets.com' not in result_link:
+        result_link = 'xyz.com'
+
     response = f'{result_text} source:{result_link}'
 
     print(response)
@@ -73,7 +76,7 @@ PROMPT_LOOKUP = PromptTemplate(
 chain_lookup = load_qa_chain(llm, chain_type="stuff", prompt=PROMPT_LOOKUP)
 
 prompt_tbb_deal = """You are a bot travel agents for travelbestbets called TravelBot.
-Always answer the questions regarding travel deals and packages from only the context below with itinerary and pricing information. 
+Always answer the questions regarding travel deals, flight deals and packages from only the context below with itinerary and pricing information. 
 Do not make up any answer.
 If you don't have the answer in the context say 'I don't know'
 Include source link in inside <a> tag with target="_blank".
@@ -157,25 +160,31 @@ def search_google(query):
     return fa
 
 
-def search_weather(query):
-    global current_query
-    result_text = weather.run(query)
-    fa = chain_search_google({"context": result_text, "question": current_query})['text']
-    return fa
+prompt_greeter = """You are a AI travel agents bot for travelbestbets.
+Your name is TravelBot.
+You never say you are an AI language model.
+Answer as human travel agent 
+
+Question: {question}
+Answer:
+"""
+
+PROMPT_GREETER = PromptTemplate(
+    template=prompt_greeter, input_variables=["question"]
+)
 
 
 def greeter(query):
-    fa = chain_search_google({"context": '', "question": query})['text']
-    return fa
+    chain = LLMChain(llm=llm, prompt=PROMPT_GREETER)
+    return chain.run(query)
 
 
 tools = [
     Tool(
         name="Greeter",
         func=greeter,
-        description="useful when user greets and non travel related queries.",
+        description="useful when user greets or say hi or hello and non travel related queries.",
         return_direct=True
-
     ),
     Tool(
         name="TravelBestBets",
@@ -187,18 +196,10 @@ tools = [
     Tool(
         name="Google",
         func=search_google,
-        description="useful when you need to answer any other question.Do not use for travel deal related questions",
+        description="useful when you need to answer any other travel related question.Do not use for travel deal related questions",
         return_direct=True
 
-    ),
-    # Tool(
-    #     name="Weather",
-    #     func=search_weather,
-    #     description="useful when you need to answer about weather, temperature about any location.Only pass location to the tool",
-    #     return_direct=True
-    #
-    # )
-
+    )
 ]
 
 tools.extend(load_tools(["openweathermap-api"]))
@@ -209,20 +210,20 @@ def process_response(response):
     if check_words_in_string(response):
         print('found i dont know')
         return '''I can't find a deal but one of our travel consultants would be happy to help you.<br> To get a 
-        quote click here: https://travelbestbets.com/request-a-quote/ <br> Or feel free to contact our office: <br> ☎ 
+        quote click here: <a href="https://travelbestbets.com/request-a-quote/" target="_blank">Request a quote</a> <br> Or feel free to contact our office: <br> ☎ 
         1-877-523-7823 <br> 📧 info@travelbestbets.com <br> And get our amazing deals sent right to your inbox. Sign 
-        up for our weekly Travel Best Bets Newsletter here: https://travelbestbets.com/services/best-bets-newsletter/ 
+        up for our weekly Travel Best Bets Newsletter here: <a href="https://travelbestbets.com/services/best-bets-newsletter/" target="_blank">Newsletter</a>
         '''
+    elif '<a href="xyz.com" target="_blank">source</a>' in response:
+        return response.replace('<a href="xyz.com" target="_blank">source</a>', """<br>One of our travel consultants would be happy to help you.<br> To get a 
+        quote click here: <a href="https://travelbestbets.com/request-a-quote/" target="_blank">Request a quote</a>  <br> Or feel free to contact our office: <br> ☎ 
+        1-877-523-7823 <br> 📧 info@travelbestbets.com """)
     else:
         return response
 
 
 def get_response(query):
     global agent
-    global current_query
-
-    current_query = query
-
     try:
 
         agent_response = agent.run(query)
