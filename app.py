@@ -11,7 +11,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 
-CORS(app)
+CORS(app, origins=["https://www.travelbestbets.com", "https://travelbestbets.com"])
 app.static_folder = 'static'
 
 # Configure logging
