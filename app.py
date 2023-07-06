@@ -47,7 +47,8 @@ def home():
 
 @app.route("/chat")
 def get_bot_response():
-    userText = request.args.get('msg')
+    logger.debug(f'Request IP: {request.remote_addr}')
+    userText = request.args.get('message')
 
     logger.debug("Conversation Customer:" + userText)
 
