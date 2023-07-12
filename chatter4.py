@@ -161,9 +161,21 @@ def search_google(query):
 
 
 prompt_greeter = """You are a AI travel agents bot for travelbestbets.
+If user is asking for contact information, say 'Contact Information'
+If user is asking to speak to human or agent , say 'Contact Information'
+If user is asking for phone or email, say 'Contact Information'
 Your name is TravelBot.
 You never say you are an AI language model.
-Answer as human travel agent 
+Answer as human travel agent .
+
+Question: I want to talk to an agent
+Answer: Contact Information
+
+Question: I want to talk to human
+Answer: Contact Information
+
+Question: Provide email or phone number
+Answer: Contact Information
 
 Question: {question}
 Answer:
@@ -175,7 +187,7 @@ PROMPT_GREETER = PromptTemplate(
 
 
 def greeter(query):
-    chain = LLMChain(llm=llm, prompt=PROMPT_GREETER)
+    chain = LLMChain(llm=ChatOpenAI(temperature=0, model='gpt-4-0613'), prompt=PROMPT_GREETER)
     return chain.run(query)
 
 
@@ -183,7 +195,7 @@ tools = [
     Tool(
         name="Greeter",
         func=greeter,
-        description="useful when user greets or say hi or hello and non travel related queries.",
+        description="useful when user greets or say hi or hello and non travel related queries and when user want to contact and agent or speak to human or user ask for email of phone number.Provide whole query as input to tool",
         return_direct=True
     ),
     Tool(
@@ -207,6 +219,8 @@ agent = initialize_agent(tools, llm, agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRI
 
 
 def process_response(response):
+    print(f'checking for response: {response}')
+
     if check_words_in_string(response):
         print('found i dont know')
         return '''I can't find a deal but one of our travel consultants would be happy to help you.<br> To get a 
@@ -214,10 +228,15 @@ def process_response(response):
         1-877-523-7823 <br> 📧 info@travelbestbets.com <br> And get our amazing deals sent right to your inbox. Sign 
         up for our weekly Travel Best Bets Newsletter here: <a href="https://travelbestbets.com/services/best-bets-newsletter/" target="_blank">Newsletter</a>
         '''
-    elif 'xyz.com' in response:
+    elif "xyz.com" in response:
         return response.replace('<a href="http://www.xyz.com" target="_blank">source</a>', """<br>One of our travel consultants would be happy to help you.<br> To get a 
         quote click here: <a href="https://travelbestbets.com/request-a-quote/" target="_blank">Request a quote</a>  <br> Or feel free to contact our office: <br> ☎ 
         1-877-523-7823 <br> 📧 info@travelbestbets.com """)
+    elif "Contact Information" in response:
+        return """One of our travel consultants would be happy to help you.<br> To get a 
+        quote click here: <a href="https://travelbestbets.com/request-a-quote/" target="_blank">Request a quote</a>  <br> Or feel free to contact our office: <br> ☎ 
+        1-877-523-7823 <br> 📧 info@travelbestbets.com """
+
     else:
         return response
 
